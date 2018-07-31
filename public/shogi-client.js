@@ -52,7 +52,7 @@ class Player{
 		if( number || number==0 )
 			this.handEl.querySelector(".numbers").children[ number ].innerText = visibleAmount
 		else
-			alert("That's a gg")
+			message("That's a gg")
 	}
 
 	removeFromHand(letter){
@@ -494,16 +494,66 @@ class Game{
 
 console.log("oh, hello :3")
 
-function message(msg) {
-	setTimeout(()=>alert(msg),100)
+function start(name){
+	const socket = io()
+	socket.emit("room-name", name)
+	socket.on("message", message)
+	g = new Game(document.querySelector("#shogi"), socket)
+}
+
+function message(text){
+	const box = document.createElement("div")
+	box.className = "message-box"
+	document.querySelector("#messages").appendChild( box )
+
+	const p = document.createElement("p")
+	p.className = "text"
+	p.innerText = text
+	box.appendChild(p)
+
+	const close = document.createElement("button")
+	close.className = "close"
+	close.innerText = "x"
+	close.addEventListener( "click", e => {
+		e.stopPropagation()
+		box.remove()
+	})
+	box.appendChild(close)
+}
+
+function ask(text){
+	return new Promise((resolve,reject)=>{
+		const box = document.createElement("div")
+		box.className = "message-box"
+		document.querySelector("#messages").appendChild( box )
+	
+		const p = document.createElement("p")
+		p.className = "text"
+		p.innerText = text
+		box.appendChild(p)
+	
+		const input = document.createElement("input")
+		box.appendChild(input)
+	
+		const submit = document.createElement("button")
+		submit.className = "submit"
+		submit.innerText = "ok"
+		submit.addEventListener( "click", e => {
+			e.stopPropagation()
+			resolve(input.value)
+			box.remove()
+		})
+		box.appendChild(submit)
+	})
 }
 
 let g
-(()=>{
-	const socket = io()
-	const roomName = prompt()
-	socket.emit("room-name", roomName)
-	socket.on("message", msg => message(msg))
-	g = new Game(document.querySelector("#shogi"), socket)
+( async ()=>{
+
+	const roomName = await ask("what's the name of the room?")
+	console.log(roomName)
+	start(roomName)
+
 })()
+
 // console.log(g)

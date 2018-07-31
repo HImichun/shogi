@@ -33,10 +33,10 @@ io.on("connection", socket => {
 		if(socket.other){
 			socket.other.emit("message","your opponent has disconnected ;-;")
 			socket.other.other = null
+			socket.other.roomName = null
 		}
 		if(socket.roomName){
 			delete rooms[socket.roomName]
-			socket.other.roomName = null
 		}
 	})
 
