@@ -524,7 +524,7 @@ function message(text){
 function ask(text){
 	return new Promise((resolve,reject)=>{
 		const box = document.createElement("div")
-		box.className = "message-box"
+		box.className = "message-box prompt-box"
 		document.querySelector("#messages").appendChild( box )
 	
 		const p = document.createElement("p")

@@ -2,6 +2,7 @@
 	margin: 0;
 	padding: 0;
 	box-sizing: border-box;
+/* 	overflow: hidden; */
 }
 
 .shogi{
@@ -9,11 +10,17 @@
 	height: 100vh;
 	flex-direction: column;
 	justify-content: center;
+	--size: calc( 100vw / 9 - 2px);
+}
+@media (min-width: 452px){
+	.shogi{
+		--size: 50px;
+	}
 }
 
 .board{
 	position: relative;
-	width: 452px;
+	width: calc( var(--size) * 9 + 2px );
 	margin: 0 auto;
 	
 	border-spacing: 0;
@@ -25,7 +32,6 @@
 }
 
 .board .cell{
-	--size: 50px;
 	width: var(--size);
 	height: var(--size);
 	border: 1px solid #888;
@@ -39,17 +45,17 @@
 	position: absolute;
 	top: 0;
 	left: 0;
-	width: 50px;
-	height: 50px;
+	width: var(--size);
+	height: var(--size);
 	
 	text-align: center;
-	font-size: 24px;
-	line-height: 50px;
+	font-size: calc( var(--size) / 2 );
+	line-height: var(--size);
 }
 .piece{
 	pointer-events: none;
-	top: calc( 50px * var(--y,0) );
-	left: calc( 50px * var(--x,0) );
+	top: calc( var(--size) * var(--y,0) );
+	left: calc( var(--size) * var(--x,0) );
 	
 	--scale: 1;
 	--rotation: 0deg;
@@ -84,9 +90,9 @@
 
 .hand{
 	position: relative;
-	margin: 10px auto;
-	height: 70px;
-	width: 350px;
+	margin: calc( var(--size) * 1/5 ) auto;
+	height: calc( var(--size) * 7/5 );
+	width: calc( var(--size) * 7 );
 }
 
 .hand .piece{
@@ -101,16 +107,16 @@
 .hand .numbers{
 	display: flex;
 	position: relative;
-	top: 34px;
+	top: calc( var(--size) * 34/50 );
 	pointer-events: none;
 }
 .hand .numbers .number{
-	width: 50px;
-	height: 50px;
+	width: var(--size);
+	height: var(--size);
 	
 	text-align: center;
-	font-size: 24px;
-	line-height: 50px;
+	font-size: calc( var(--size) / 2 );
+	line-height: var(--size);
 }
 
 
@@ -119,6 +125,7 @@
 	display: flex;
 	position: absolute;
 	width: 400px;
+	max-width: 100%;
 	height: 100%;
 	top: 0;
 	left: 50%;
@@ -131,7 +138,7 @@
 
 .message-box{
 	position: relative;
-	width: 400px;
+	width: 100%;
 	margin: 10px 0;
 	padding: 10px;
 	
@@ -197,6 +204,9 @@
 	color: white;
 	background: rgba(255,100,100,.9);
 	box-shadow: 0 0 4px rgba(255,0,0,1);
+}
+.message-box:not(.prompt-box){
+	max-width: calc( 100% - 45px );
 }
 
 
