@@ -23,56 +23,30 @@ app.get("/hotseat", (req,res) => {
 })
 
 
+const Room = require("./room")
 const rooms = {}
+function removeRoom(roomName){
+	delete rooms[roomName]
+}
 
 io.on("connection", socket => {
 	console.log("a user connected")
 
 	socket.on("disconnect", () => {
 		console.log("a user disconnected")
-		if(socket.other){
-			socket.other.emit("message","your opponent has disconnected ;-;")
-			socket.other.other = null
-			socket.other.roomName = null
-		}
-		if(socket.roomName){
-			delete rooms[socket.roomName]
-		}
+		socket.room.leave(socket)
 	})
 
 	socket.on("room-name", name => {
-		if( !rooms.hasOwnProperty(name) ){
-			socket.roomName = name
-			rooms[name] = [socket]
-			socket.emit("message", `you created a room called \"${name}\". don't touch anything please`)
-		}
-		else if( rooms[name].length == 1 ){
-			socket.roomName = name
-
-			rooms[name][1] = socket
-			rooms[name][0].other = socket
-
-			socket.emit("message", `you entered the room. gl hf ;3`)
-			
-			socket.other = rooms[name][0]
-			socket.other.emit("message", "now you can play! gl hf ;3")
-		}
+		if( !rooms.hasOwnProperty(name) )
+			rooms[name] = new Room(name, socket, removeRoom)
 		else
-			socket.emit("message", "the room is full, sorry. reload the page to try a different room")
+			rooms[name].enter(socket)
 	})
 
-	socket.on("click", (x,y) => {
-		if(socket.other)
-			socket.other.emit("click", x,y)
-		else
-			socket.emit("message", "you're playing with no one.")
-	})
-
-	socket.on("hand-click", number => {
-		if(socket.other)
-			socket.other.emit("hand-click", number)
-		else
-			socket.emit("message", "you're playing with no one.")
+	socket.on("action", (action) => {
+		if(socket.room)
+			socket.room.action(socket,action)
 	})
 
 })

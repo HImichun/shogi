@@ -119,7 +119,7 @@ class Player{
 			el.addEventListener("click", e=>{
 				e.stopPropagation()
 				const number = e.currentTarget.style.getPropertyValue("--x")
-				this.game.socket.emit("hand-click", number )
+				this.game.socket.emit("action", {type:"hand",number} )
 				this.game.handClick( this.game.player, number )
 			})
 
@@ -362,14 +362,37 @@ class Game{
 		this.createBoard()
 		this.createPieces()
 
-		this.socket.on("click", (x,y) => {
-			console.log(`clicked on ${8-x}:${8-y}`)
-			this.cellClick(this.players[1], 8-x, 8-y)
+		this.socket.on("action", ({type,x,y,number}) => {
+			switch(type){
+				case "click": this.cellClick(this.players[1], 8-x, 8-y); break;
+				case "hand" : this.handClick(this.players[1], number); break;
+				case "rewind":this.rewind(); break;
+				default: break
+			}
 		})
 
-		this.socket.on("hand-click", number => {
-			console.log(`clicked on ${number} in hand`)
-			this.handClick(this.players[1], number)
+		this.socket.on("player-number", number => {
+			this.playerNumber = number
+			console.log("You're playing as player"+number)
+		})
+
+		this.socket.on("history", history => {
+			for( let {type,x,y,number,player} of history ){
+				console.log(`This is a turn of player ${player}`)
+				player = this.players[ player==this.playerNumber? 0 : 1 ]
+				//player is converted from Int to Player
+				console.log(`x is ${x}, y is ${y}`)
+				if(x||x===0) x = player.id===0? x : 8-x
+				if(y||y===0) y = player.id===0? y : 8-y
+				console.log(`x is ${x}, y is ${y}`)
+				console.log(`This is a turn of player ${player.id}`)
+				console.log(`That's my turn. ${player.id===0}`)
+				switch(type){
+					case "click": this.cellClick(player, x, y); break;
+					case "hand" : this.handClick(player, number); break;
+					default: break
+				}
+			}
 		})
 
 		this.player = this.players[0]
@@ -394,7 +417,7 @@ class Game{
 				cell.classList = "cell"
 				// cell.innerText = x+":"+y
 				cell.addEventListener("click", e=>{
-					this.socket.emit("click", x,y)
+					this.socket.emit("action", {type:"click",x,y})
 					this.cellClick(this.player,x,y)
 				})
 				row.appendChild(cell)
